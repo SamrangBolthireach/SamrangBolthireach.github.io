@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Even or Odd Guessing Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-image: url('./background.jpg'); /* Replace 'background_image.jpg' with the path to your image */
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    .credits {
+      font-family:Georgia, 'Times New Roman', Times, serif;
+      font-size: 18px;
+    }
+
+    .container {
+      text-align: center;
+      margin-top: 300px; /* Adjusted margin-top to create space */
+      padding: 20px; /* Added padding for better spacing */
+    }
+
+    button {
+      font-size: 18px;
+      padding: 20px;
+      margin: 70px;
+      cursor: pointer;
+    }
+
+    #result {
+      font-size: 40px;
+      margin-top: 20px;
+    }
+
+    #tally {
+      margin-top: 40px;
+      padding: 20px;
+    }
+
+    #turnIndicator {
+      font-size: 28px;
+      margin-top: 20px;
+    }
+
+    table {
+      margin: 20px auto;
+      border-collapse: collapse;
+      width: 60%;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(3600deg); } /* spin animation */ 
+    }
+
+    .spinning {
+      animation: spin 3s cubic-bezier(0.25, 0.1, 0.25, 1) forwards; /* used to create a spinning animation when its selecting
+      a random number */ 
+    } 
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Even or Odd Guessing Game</h1>
+    <p>Guess whether the next random number will be even or odd:</p>
+    <button onclick="guess('even')">Even</button>
+    <button onclick="guess('odd')">Odd</button> <!--Name displayed and buttons for playing-->
+    <p id="result"></p>
+    <div id="tally"> 
+      <p>Correct Guesses: <span id="correctCount">0</span></p>
+      <p>Incorrect Guesses: <span id="incorrectCount">0</span></p> 
+    </div> <!--This function keeps track of how many times you guessed correctly and icorrectly-->
+    <p id="turnIndicator">Player 1 Turn</p> <!--Creates line to display whos turn-->
+    <table>
+      <thead>
+        <tr>
+          <th>Player 1</th>
+          <th>Player 2</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td contenteditable="true" id="player1" data-points="0">0</td>
+          <td contenteditable="true" id="player2" data-points="0">0</td>  <!--Point counter-->
+        </tr>
+      </tbody>
+    </table>
+    <img src="" alt="" id="correctImage1" style="display: none;"> <!--
+      // this part reset and removes the pervious image when played again-->
+    <img src="" alt="" id="correctImage2" style="display: none;">
+    <img src="" alt="" id="wrongImage1" style="display: none;">
+    <img src="" alt="" id="wrongImage2" style="display: none;">
+  </div>
+
+  <script>
+    var correctGuesses = 0;
+    var incorrectGuesses = 0;
+    var currentPlayer = 'player1'; // Initially, player 1 starts
+
+    function updateTally() {
+      document.getElementById('correctCount').textContent = correctGuesses;
+      document.getElementById('incorrectCount').textContent = incorrectGuesses;
+    } /* updates the correct and incorrect guess counter */ 
+
+    function guess(userGuess) { /* controls the game, generates the numbers, changes the turns, count the results
+      and keeps track of the score */ 
+      document.getElementById('result').textContent = 'Spinning...';
+      document.getElementById('result').classList.add('spinning');
+
+      // this part reset and removes the pervious image when played again
+      document.getElementById('correctImage1').src = '';
+      document.getElementById('correctImage2').src = '';
+      document.getElementById('wrongImage1').src = '';
+      document.getElementById('wrongImage2').src = '';
+/////////////////////////////////////////////////////////////////
+      var randomNumber = Math.floor(Math.random() * 99) + 1; // Generate a random number between 1 and 99
+      var isEven = randomNumber % 2 === 0; // Check if the random number is even
+
+      // Delays the results, revealing after 3 seconds
+      setTimeout(function() {
+        document.getElementById('result').classList.remove('spinning');
+
+        if ((userGuess === 'even' && isEven) || (userGuess === 'odd' && !isEven)) {
+          document.getElementById('result').textContent = 'Congratulations! You guessed correctly. The number was ' + randomNumber + '.';
+          if (currentPlayer === 'player1') {
+            document.getElementById('correctImage1').src = './happy.gif'; // <--Shows an image when guessed correctly
+            document.getElementById('correctImage1').style.display = 'inline';
+          } else {
+            document.getElementById('correctImage2').src = './happy2.jpg'; // second imagine 
+            document.getElementById('correctImage2').style.display = 'inline';
+          }
+          correctGuesses++;
+          incrementPoints(currentPlayer);
+        } else {
+          document.getElementById('result').textContent = 'Sorry! You guessed wrong. The number was ' + randomNumber + '.';
+          if (currentPlayer === 'player1') {
+            document.getElementById('wrongImage1').src = './sad.gif'; // If guessed incorrectly
+            document.getElementById('wrongImage1').style.display = 'inline';
+          } else {
+            document.getElementById('wrongImage2').src = './sad2.jgp'; // 
+            document.getElementById('wrongImage2').style.display = 'inline';
+          }
+          incorrectGuesses++;
+          switchPlayer();
+        }
+        updateTally();
+        updateTurnIndicator(); // <-- shows whos turn it is
+      }, 3000); // <--animation timer>
+    }
+
+    function incrementPoints(player) { /* adds the points and keep track of the points for player */ 
+      var playerCell = document.getElementById(player);
+      var points = parseInt(playerCell.dataset.points);
+      points++;
+      playerCell.textContent = points;
+      playerCell.dataset.points = points;
+    }
+
+    function switchPlayer() { /* Switches the players turn */
+      currentPlayer = currentPlayer === 'player1' ? 'player2' : 'player1';
+    }
+
+    function updateTurnIndicator() { /*Display whos turn it is */ 
+      document.getElementById('turnIndicator').textContent = currentPlayer === 'player1' ? 'Player 1 Turn' : 'Player 2 Turn';
+    }
+  </script>
+  <div class="credits">
+    <p> [Made by Thireach]</p>
+  </div>
+</body>
+</html>
